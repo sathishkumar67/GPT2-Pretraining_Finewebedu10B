@@ -15,7 +15,16 @@ from lightning.pytorch import Trainer
 from lightning.pytorch.loggers import CSVLogger
 from schedulefree.adamw_schedulefree import AdamWScheduleFree
 
-# config
+# downloading the dataset
+login("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")
+hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename="edufineweb_train_000004.npy", repo_type="dataset", local_dir="/kaggle/working/")
+hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename="edufineweb_train_000005.npy", repo_type="dataset", local_dir="/kaggle/working/")
+hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename="edufineweb_train_000006.npy", repo_type="dataset", local_dir="/kaggle/working/")
+hf_hub_download(repo_id="pt-sk/GPT2_pretrained_finewebedu10B", filename="1st_30m_tokens.ckpt", repo_type="model", local_dir="/kaggle/working/")
+
+
+
+# config# config
 @dataclass
 class GPTConfig:
     block_size: int = 1024 # max sequence length
@@ -35,6 +44,7 @@ config = GPTConfig()
 torch.manual_seed(config.seed)
 
 
+# dataset preparation
 # dataset preparation
 class TokenDataset(Dataset):
     def __init__(self, input_ids, config: GPTConfig):
@@ -59,11 +69,13 @@ class TokenDataset(Dataset):
         
         return torch.LongTensor(x.tolist()), torch.LongTensor(y.tolist())
     
-tokens = np.load("/kaggle/working/edufineweb_train_000001.npy")
+tokens1 = np.load("/kaggle/working/edufineweb_train_000004.npy")
+tokens2 = np.load("/kaggle/working/edufineweb_train_000005.npy")
+tokens3 = np.load("/kaggle/working/edufineweb_train_000006.npy")
+tokens = np.concatenate([tokens1, tokens2, tokens3])
 
 dataset = TokenDataset(tokens, config)
 dataloader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True, num_workers=config.num_workers)
-
 
 class CausalSelfAttention(nn.Module):
 
@@ -249,16 +261,15 @@ class GPT2_Wrapper(L.LightningModule):
         optimizer = AdamWScheduleFree(self.model.parameters(), lr=config.learning_rate, betas=config.betas, eps=config.eps, weight_decay=config.weight_decay)
         return optimizer
 
-
-gpt_model = GPT2_Wrapper(gpt)
+gpt_model = GPT2_Wrapper.load_from_checkpoint("/kaggle/working/1st_30m_tokens.ckpt",model=gpt)
 
 # logs
-logger = CSVLogger("logs", name="first_10m_tokens")
+logger = CSVLogger("logs", name="2nd_30m_tokens")
 
 
 trainer = Trainer(max_epochs=1,
                   accelerator="cuda",
-                  strategy="ddp_notebook",
+                  strategy="ddp",
                   devices=2,
                   logger=logger)
 trainer.fit(gpt_model, dataloader)
