@@ -232,6 +232,7 @@ class GPT2_Wrapper(L.LightningModule):
     def __init__(self, model):
         super().__init__()
         self.model = model
+        self.optimizer = self.configure_optimizers()
 
     def training_step(self, batch, batch_idx):
         self.model.train()
