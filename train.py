@@ -69,9 +69,9 @@ class TokenDataset(Dataset):
         
         return torch.LongTensor(x.tolist()), torch.LongTensor(y.tolist())
     
-tokens1 = np.load("/kaggle/working/edufineweb_train_000004.npy")
-tokens2 = np.load("/kaggle/working/edufineweb_train_000005.npy")
-tokens3 = np.load("/kaggle/working/edufineweb_train_000006.npy")
+tokens1 = np.load("/kaggle/working/edufineweb_train_000007.npy")
+tokens2 = np.load("/kaggle/working/edufineweb_train_000008.npy")
+tokens3 = np.load("/kaggle/working/edufineweb_train_000009.npy")
 tokens = np.concatenate([tokens1, tokens2, tokens3])
 
 dataset = TokenDataset(tokens, config)
