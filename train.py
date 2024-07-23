@@ -17,10 +17,10 @@ from schedulefree.adamw_schedulefree import AdamWScheduleFree
 
 # downloading the dataset
 login("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")
-hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename="edufineweb_train_000007.npy", repo_type="dataset", local_dir="/kaggle/working/")
-hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename="edufineweb_train_000008.npy", repo_type="dataset", local_dir="/kaggle/working/")
-hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename="edufineweb_train_000009.npy", repo_type="dataset", local_dir="/kaggle/working/")
-hf_hub_download(repo_id="pt-sk/GPT2_pretrained_finewebedu10B", filename="2nd_30mtokens_model.ckpt", repo_type="model", local_dir="/kaggle/working/")
+hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename="edufineweb_train_000010.npy", repo_type="dataset", local_dir="/kaggle/working/")
+hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename="edufineweb_train_000011.npy", repo_type="dataset", local_dir="/kaggle/working/")
+hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename="edufineweb_train_000012.npy", repo_type="dataset", local_dir="/kaggle/working/")
+hf_hub_download(repo_id="pt-sk/GPT2_pretrained_finewebedu10B", filename="3rd_30mtokens_model.ckpt", repo_type="model", local_dir="/kaggle/working/")
 
 
 
@@ -69,9 +69,9 @@ class TokenDataset(Dataset):
         
         return torch.LongTensor(x.tolist()), torch.LongTensor(y.tolist())
     
-tokens1 = np.load("/kaggle/working/edufineweb_train_000007.npy")
-tokens2 = np.load("/kaggle/working/edufineweb_train_000008.npy")
-tokens3 = np.load("/kaggle/working/edufineweb_train_000009.npy")
+tokens1 = np.load("/kaggle/working/edufineweb_train_000010.npy")
+tokens2 = np.load("/kaggle/working/edufineweb_train_000011.npy")
+tokens3 = np.load("/kaggle/working/edufineweb_train_000012.npy")
 tokens = np.concatenate([tokens1, tokens2, tokens3])
 
 dataset = TokenDataset(tokens, config)
@@ -261,10 +261,10 @@ class GPT2_Wrapper(L.LightningModule):
         optimizer = AdamWScheduleFree(self.model.parameters(), lr=config.learning_rate, betas=config.betas, eps=config.eps, weight_decay=config.weight_decay)
         return optimizer
 
-gpt_model = GPT2_Wrapper.load_from_checkpoint("/kaggle/working/2nd_30mtokens_model.ckpt",model=gpt)
+gpt_model = GPT2_Wrapper.load_from_checkpoint("/kaggle/working/3rd_30mtokens_model.ckpt",model=gpt)
 
 # logs
-logger = CSVLogger("logs", name="3rd_30m_tokens")
+logger = CSVLogger("logs", name="4th_30m_tokens")
 
 
 trainer = Trainer(max_epochs=1,
