@@ -9,22 +9,35 @@ import torch.nn as nn
 from torch.nn import functional as F
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
-from huggingface_hub import login, hf_hub_download
+from huggingface_hub import login, hf_hub_download, HfApi
 import lightning as L
 from lightning.pytorch import Trainer
 from lightning.pytorch.loggers import CSVLogger
 from schedulefree.adamw_schedulefree import AdamWScheduleFree
 
+login_token = "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"
+
+file_data1 = "edufineweb_train_000019.npy"
+file_data2 = "edufineweb_train_000020.npy"
+file_data3 = "edufineweb_train_000021.npy"
+
+ckpt_file = "6th_30mtokens_model.ckpt"
+
+log_name = "7th_30mtokens"
+
+model_upload_name = "7th_30mtokens_model.ckpt"
+
+# logging in to the hugging face
+login(login_token)
+
 # downloading the dataset
-login("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")
-hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename="edufineweb_train_000016.npy", repo_type="dataset", local_dir="/kaggle/working/")
-hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename="edufineweb_train_000017.npy", repo_type="dataset", local_dir="/kaggle/working/")
-hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename="edufineweb_train_000018.npy", repo_type="dataset", local_dir="/kaggle/working/")
-hf_hub_download(repo_id="pt-sk/GPT2_pretrained_finewebedu10B", filename="5th_30mtokens_model.ckpt", repo_type="model", local_dir="/kaggle/working/")
+for file in [file_data1, file_data2, file_data3]:
+    hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename=file, repo_type="dataset", local_dir="/kaggle/working/")
+
+hf_hub_download(repo_id="pt-sk/GPT2_pretrained_finewebedu10B", filename=ckpt_file, repo_type="model", local_dir="/kaggle/working/")
 
 
-
-# config# config
+# config
 @dataclass
 class GPTConfig:
     block_size: int = 1024 # max sequence length
@@ -69,9 +82,9 @@ class TokenDataset(Dataset):
         
         return torch.LongTensor(x.tolist()), torch.LongTensor(y.tolist())
     
-tokens1 = np.load("/kaggle/working/edufineweb_train_000016.npy")
-tokens2 = np.load("/kaggle/working/edufineweb_train_000017.npy")
-tokens3 = np.load("/kaggle/working/edufineweb_train_000018.npy")
+tokens1 = np.load(f"/kaggle/working/{file_data1}")
+tokens2 = np.load(f"/kaggle/working/{file_data2}")
+tokens3 = np.load(f"/kaggle/working/{file_data3}")
 tokens = np.concatenate([tokens1, tokens2, tokens3])
 
 dataset = TokenDataset(tokens, config)
@@ -261,10 +274,10 @@ class GPT2_Wrapper(L.LightningModule):
         optimizer = AdamWScheduleFree(self.model.parameters(), lr=config.learning_rate, betas=config.betas, eps=config.eps, weight_decay=config.weight_decay)
         return optimizer
 
-gpt_model = GPT2_Wrapper.load_from_checkpoint("/kaggle/working/5th_30mtokens_model.ckpt",model=gpt)
+gpt_model = GPT2_Wrapper.load_from_checkpoint(f"/kaggle/working/{ckpt_file}",model=gpt)
 
 # logs
-logger = CSVLogger("logs", name="6th_30m_tokens")
+logger = CSVLogger("logs", name=log_name)
 
 
 trainer = Trainer(max_epochs=1,
@@ -273,3 +286,14 @@ trainer = Trainer(max_epochs=1,
                   devices=2,
                   logger=logger)
 trainer.fit(gpt_model, dataloader)
+
+model_path = f"/kaggle/input/logs/{log_name}/version_0/checkpoints/epoch=0-step=18311.ckpt"
+
+# upload the model
+api = HfApi()
+api.upload_file(
+    path_or_fileobj=model_path,
+    path_in_repo=model_upload_name,
+    repo_id="pt-sk/GPT2_pretrained_finewebedu10B",
+    repo_type="model",
+)
