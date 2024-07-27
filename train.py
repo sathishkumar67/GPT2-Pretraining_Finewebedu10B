@@ -15,15 +15,15 @@ from lightning.pytorch import Trainer
 from lightning.pytorch.loggers import CSVLogger
 from schedulefree.adamw_schedulefree import AdamWScheduleFree
 
-login_token = "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"
+login_token = "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"
 
-file_data1 = "edufineweb_train_000019.npy"
-file_data2 = "edufineweb_train_000020.npy"
-file_data3 = "edufineweb_train_000021.npy"
+file_data1 = "edufineweb_train_000022.npy"
+file_data2 = "edufineweb_train_000023.npy"
+file_data3 = "edufineweb_train_000024.npy"
 
-ckpt_file = "6th_30mtokens_model.ckpt"
+ckpt_file = "7th_30mtokens_model.ckpt"
 
-log_name = "7th_30mtokens"
+log_name = "7th_30mtokens_model"
 
 model_upload_name = "7th_30mtokens_model.ckpt"
 
@@ -287,7 +287,7 @@ trainer = Trainer(max_epochs=1,
                   logger=logger)
 trainer.fit(gpt_model, dataloader)
 
-model_path = f"/kaggle/input/logs/{log_name}/version_0/checkpoints/epoch=0-step=18311.ckpt"
+model_path = f"logs/{log_name}/version_0/checkpoints/epoch=0-step=18311.ckpt"
 
 # upload the model
 api = HfApi()
