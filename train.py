@@ -23,9 +23,9 @@ file_data3 = "edufineweb_train_000024.npy"
 
 ckpt_file = "7th_30mtokens_model.ckpt"
 
-log_name = "7th_30mtokens_model"
+log_name = "8th_30mtokens_model"
 
-model_upload_name = "7th_30mtokens_model.ckpt"
+model_upload_name = "8th_30mtokens_model.ckpt"
 
 # logging in to the hugging face
 login(login_token)
