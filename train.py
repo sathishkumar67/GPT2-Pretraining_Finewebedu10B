@@ -17,15 +17,15 @@ from schedulefree.adamw_schedulefree import AdamWScheduleFree
 
 login_token = "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"
 
-file_data1 = "edufineweb_train_000043.npy"
-file_data2 = "edufineweb_train_000044.npy"
-file_data3 = "edufineweb_train_000045.npy"
+file_data1 = "edufineweb_train_000046.npy"
+file_data2 = "edufineweb_train_000047.npy"
+file_data3 = "edufineweb_train_000048.npy"
 
-ckpt_file = "14th_30mtokens_model.ckpt"
+ckpt_file = "15th_30mtokens_model.ckpt"
 
-log_name = "15th_30mtokens_model"
+log_name = "16th_30mtokens_model"
 
-model_upload_name = "15th_30mtokens_model.ckpt"
+model_upload_name = "16th_30mtokens_model.ckpt"
 
 # logging in to the hugging face
 login(login_token)
