@@ -15,7 +15,7 @@ from lightning.pytorch import Trainer
 from lightning.pytorch.loggers import CSVLogger
 from schedulefree.adamw_schedulefree import AdamWScheduleFree
 
-login_token = "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"
+login_token = "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"
 
 file_data1 = "edufineweb_train_000058.npy"
 file_data2 = "edufineweb_train_000059.npy"
