@@ -1,37 +1,10 @@
-# imports
 from dataclasses import dataclass
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-from torch.utils.data import Dataset, DataLoader
-import numpy as np
-from huggingface_hub import login, hf_hub_download, HfApi
-import lightning as L
-from lightning.pytorch import Trainer
-from lightning.pytorch.loggers import CSVLogger
-from schedulefree.adamw_schedulefree import AdamWScheduleFree
-
-data_file = "edufineweb_train_000100.npy"
-
-ckpt_file = "33rd_30mtokens_model.ckpt"
-
-log_name = "final_model"
-
-model_upload_name = "final_model.ckpt"
-
-# logging in to the hugging face
-# login(login_token)
-
-# downloading the dataset
-# for file in [file_data1, file_data2, file_data3]:
-    # hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename=file, repo_type="dataset", local_dir="/kaggle/working/")
-
-hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename=data_file, repo_type="dataset", local_dir="/kaggle/working/")
-
-hf_hub_download(repo_id="pt-sk/GPT2_pretrained_finewebedu10B", filename=ckpt_file, repo_type="model", local_dir="/kaggle/working/")
 
 
-# config
+
 @dataclass
 class GPTConfig:
     block_size: int = 1024 # max sequence length
@@ -51,40 +24,7 @@ config = GPTConfig()
 torch.manual_seed(config.seed)
 
 
-# dataset preparation
-# dataset preparation
-class TokenDataset(Dataset):
-    def __init__(self, input_ids, config: GPTConfig):
-        self.input_ids = input_ids
-        self.block_size = config.block_size
 
-    def __len__(self):
-        # Number of full blocks
-        return (len(self.input_ids) - 1) // self.block_size
-
-    def __getitem__(self, idx):     
-        start_idx = idx * self.block_size
-        end_idx = start_idx + self.block_size
-        x = self.input_ids[start_idx:end_idx]
-        y = self.input_ids[start_idx+1:end_idx+1]
-
-        # Pad sequences if they are shorter than block_size
-        if len(x) < self.block_size:
-            padding_length = self.block_size - len(x)
-            x = torch.cat([x, torch.zeros(padding_length, dtype=torch.long)])
-            y = torch.cat([y, torch.zeros(padding_length, dtype=torch.long)])
-        
-        return torch.LongTensor(x.tolist()), torch.LongTensor(y.tolist())
-    
-# tokens1 = np.load(f"/kaggle/working/{file_data1}")
-# tokens2 = np.load(f"/kaggle/working/{file_data2}")
-# tokens3 = np.load(f"/kaggle/working/{file_data3}")
-# tokens = np.concatenate([tokens1, tokens2, tokens3])
-
-tokens = np.load(f"/kaggle/working/{data_file}")
-
-dataset = TokenDataset(tokens, config)
-dataloader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True, num_workers=config.num_workers)
 
 class CausalSelfAttention(nn.Module):
 
@@ -247,49 +187,3 @@ class GPT(nn.Module):
 
 
 gpt = GPT(config)
-
-
-class GPT2_Wrapper(L.LightningModule):
-    def __init__(self, model):
-        super().__init__()
-        self.model = model
-        self.optimizer = self.configure_optimizers()
-
-    def training_step(self, batch, batch_idx):
-        self.model.train()
-        optimizer = self.optimizers()
-        optimizer.zero_grad()
-        
-        batch, label = batch
-        logits, loss = self.model(batch, label)
-        self.log("Train_Loss", loss, prog_bar=True)
-
-        return loss
-
-    def configure_optimizers(self):
-        optimizer = AdamWScheduleFree(self.model.parameters(), lr=config.learning_rate, betas=config.betas, eps=config.eps, weight_decay=config.weight_decay)
-        return optimizer
-
-gpt_model = GPT2_Wrapper.load_from_checkpoint(f"/kaggle/working/{ckpt_file}",model=gpt)
-
-# logs
-logger = CSVLogger("logs", name=log_name)
-
-
-trainer = Trainer(max_epochs=1,
-                  accelerator="cuda",
-                  strategy="ddp",
-                  devices=2,
-                  logger=logger)
-trainer.fit(gpt_model, dataloader)
-
-model_path = f"logs/{log_name}/version_0/checkpoints/epoch=0-step=18311.ckpt"
-
-# upload the model
-api = HfApi()
-api.upload_file(
-    path_or_fileobj=model_path,
-    path_in_repo=model_upload_name,
-    repo_id="pt-sk/GPT2_pretrained_finewebedu10B",
-    repo_type="model",
-)
