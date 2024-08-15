@@ -15,24 +15,22 @@ from lightning.pytorch import Trainer
 from lightning.pytorch.loggers import CSVLogger
 from schedulefree.adamw_schedulefree import AdamWScheduleFree
 
-login_token = "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"
+data_file = "edufineweb_train_000100.npy"
 
-file_data1 = "edufineweb_train_000097.npy"
-file_data2 = "edufineweb_train_000098.npy"
-file_data3 = "edufineweb_train_000099.npy"
+ckpt_file = "33rd_30mtokens_model.ckpt"
 
-ckpt_file = "32th_30mtokens_model.ckpt"
+log_name = "final_model"
 
-log_name = "33th_30mtokens_model"
-
-model_upload_name = "33th_30mtokens_model.ckpt"
+model_upload_name = "final_model.ckpt"
 
 # logging in to the hugging face
-login(login_token)
+# login(login_token)
 
 # downloading the dataset
-for file in [file_data1, file_data2, file_data3]:
-    hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename=file, repo_type="dataset", local_dir="/kaggle/working/")
+# for file in [file_data1, file_data2, file_data3]:
+    # hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename=file, repo_type="dataset", local_dir="/kaggle/working/")
+
+hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename=data_file, repo_type="dataset", local_dir="/kaggle/working/")
 
 hf_hub_download(repo_id="pt-sk/GPT2_pretrained_finewebedu10B", filename=ckpt_file, repo_type="model", local_dir="/kaggle/working/")
 
@@ -82,10 +80,12 @@ class TokenDataset(Dataset):
         
         return torch.LongTensor(x.tolist()), torch.LongTensor(y.tolist())
     
-tokens1 = np.load(f"/kaggle/working/{file_data1}")
-tokens2 = np.load(f"/kaggle/working/{file_data2}")
-tokens3 = np.load(f"/kaggle/working/{file_data3}")
-tokens = np.concatenate([tokens1, tokens2, tokens3])
+# tokens1 = np.load(f"/kaggle/working/{file_data1}")
+# tokens2 = np.load(f"/kaggle/working/{file_data2}")
+# tokens3 = np.load(f"/kaggle/working/{file_data3}")
+# tokens = np.concatenate([tokens1, tokens2, tokens3])
+
+tokens = np.load(f"/kaggle/working/{data_file}")
 
 dataset = TokenDataset(tokens, config)
 dataloader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True, num_workers=config.num_workers)
