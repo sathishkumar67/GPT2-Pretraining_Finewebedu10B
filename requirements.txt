@@ -1,2 +1,3 @@
 lightning
 schedulefree
+huggingface_hub
