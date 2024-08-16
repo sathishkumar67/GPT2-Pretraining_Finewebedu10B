@@ -186,4 +186,4 @@ class GPT(nn.Module):
         return model
 
 
-gpt = GPT(config)
+gpt2 = GPT(config)
