@@ -1,3 +1,4 @@
 1. need to evaluate the finewebedu_gpt on hello swag eval
 2. need to update the code for downloading datasets of fineweb edu
-3. using the idea in the dataset downloading file to download other datasets
+3. updating the dataset downloader for downloading other datasets
+4. using the file in metrics to plot eval
