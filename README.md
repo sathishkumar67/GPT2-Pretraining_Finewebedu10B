@@ -1,1 +1,2 @@
-Pretraining the GPT2 Model using FineWebEDU dataset. Training using a Multi-GPU Training Called ddp_notebook in kaggle notebook................
+* pretraining GPT2 Model using FineWebEDU dataset. 
+* Training using distributed data parallel technique in kaggle notebook
