@@ -5,31 +5,19 @@ import torch.nn as nn
 from torch.nn import functional as F
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
-from huggingface_hub import login, hf_hub_download, HfApi
+from huggingface_hub import  hf_hub_download
 import lightning as L
 from lightning.pytorch import Trainer
 from lightning.pytorch.loggers import CSVLogger
 from schedulefree.adamw_schedulefree import AdamWScheduleFree
 
-data_file = "edufineweb_train_000100.npy"
-
-ckpt_file = "33rd_30mtokens_model.ckpt"
-
-log_name = "final_model"
-
-model_upload_name = "final_model.ckpt"
-
-# logging in to the hugging face
-# login(login_token)
+file1 = "edufineweb_train_000001.npy"
+file2 = "edufineweb_train_000002.npy"
+file3 = "edufineweb_train_000003.npy"
 
 # downloading the dataset
-# for file in [file_data1, file_data2, file_data3]:
-    # hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename=file, repo_type="dataset", local_dir="/kaggle/working/")
-
-hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename=data_file, repo_type="dataset", local_dir="/kaggle/working/")
-
-hf_hub_download(repo_id="pt-sk/GPT2_pretrained_finewebedu10B", filename=ckpt_file, repo_type="model", local_dir="/kaggle/working/")
-
+for file in [file1, file2, file3]:
+    hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename=file, repo_type="dataset", local_dir="/kaggle/working/")
 
 # config
 @dataclass
@@ -51,7 +39,6 @@ config = GPTConfig()
 torch.manual_seed(config.seed)
 
 
-# dataset preparation
 # dataset preparation
 class TokenDataset(Dataset):
     def __init__(self, input_ids, config: GPTConfig):
@@ -76,12 +63,10 @@ class TokenDataset(Dataset):
         
         return torch.LongTensor(x.tolist()), torch.LongTensor(y.tolist())
     
-# tokens1 = np.load(f"/kaggle/working/{file_data1}")
-# tokens2 = np.load(f"/kaggle/working/{file_data2}")
-# tokens3 = np.load(f"/kaggle/working/{file_data3}")
-# tokens = np.concatenate([tokens1, tokens2, tokens3])
-
-tokens = np.load(f"/kaggle/working/{data_file}")
+tokens1 = np.load(f"/kaggle/working/{file1}")
+tokens2 = np.load(f"/kaggle/working/{file2}")
+tokens3 = np.load(f"/kaggle/working/{file3}")
+tokens = np.concatenate([tokens2, tokens1, tokens3]) # random shuffle
 
 dataset = TokenDataset(tokens, config)
 dataloader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True, num_workers=config.num_workers)
@@ -196,56 +181,6 @@ class GPT(nn.Module):
             loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1))
         return logits, loss
 
-    @classmethod
-    def from_pretrained(cls, model_type):
-        """Loads pretrained GPT-2 model weights from huggingface"""
-        assert model_type in {'gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl'}
-        from transformers import GPT2LMHeadModel
-        print("loading weights from pretrained gpt: %s" % model_type)
-
-        # n_layer, n_head and n_embd are determined from model_type
-        config_args = {
-            'gpt2':         dict(n_layer=12, n_head=12, n_embd=768),  # 124M params
-            'gpt2-medium':  dict(n_layer=24, n_head=16, n_embd=1024), # 350M params
-            'gpt2-large':   dict(n_layer=36, n_head=20, n_embd=1280), # 774M params
-            'gpt2-xl':      dict(n_layer=48, n_head=25, n_embd=1600), # 1558M params
-        }[model_type]
-        config_args['vocab_size'] = 50257 # always 50257 for GPT model checkpoints
-        config_args['block_size'] = 1024 # always 1024 for GPT model checkpoints
-        # create a from-scratch initialized minGPT model
-        config = GPTConfig(**config_args)
-        model = GPT(config)
-        sd = model.state_dict()
-        sd_keys = sd.keys()
-        sd_keys = [k for k in sd_keys if not k.endswith('.attn.bias')] # discard this mask / buffer, not a param
-
-        # init a huggingface/transformers model
-        model_hf = GPT2LMHeadModel.from_pretrained(model_type)
-        sd_hf = model_hf.state_dict()
-
-        # copy while ensuring all of the parameters are aligned and match in names and shapes
-        sd_keys_hf = sd_hf.keys()
-        sd_keys_hf = [k for k in sd_keys_hf if not k.endswith('.attn.masked_bias')] # ignore these, just a buffer
-        sd_keys_hf = [k for k in sd_keys_hf if not k.endswith('.attn.bias')] # same, just the mask (buffer)
-        transposed = ['attn.c_attn.weight', 'attn.c_proj.weight', 'mlp.c_fc.weight', 'mlp.c_proj.weight']
-        # basically the openai checkpoints use a "Conv1D" module, but we only want to use a vanilla Linear
-        # this means that we have to transpose these weights when we import them
-        assert len(sd_keys_hf) == len(sd_keys), f"mismatched keys: {len(sd_keys_hf)} != {len(sd_keys)}"
-        for k in sd_keys_hf:
-            if any(k.endswith(w) for w in transposed):
-                # special treatment for the Conv1D weights we need to transpose
-                assert sd_hf[k].shape[::-1] == sd[k].shape
-                with torch.no_grad():
-                    sd[k].copy_(sd_hf[k].t())
-            else:
-                # vanilla copy over the other parameters
-                assert sd_hf[k].shape == sd[k].shape
-                with torch.no_grad():
-                    sd[k].copy_(sd_hf[k])
-
-        return model
-
-
 gpt = GPT(config)
 
 
@@ -261,7 +196,7 @@ class GPT2_Wrapper(L.LightningModule):
         optimizer.zero_grad()
         
         batch, label = batch
-        logits, loss = self.model(batch, label)
+        _, loss = self.model(batch, label)
         self.log("Train_Loss", loss, prog_bar=True)
 
         return loss
@@ -270,26 +205,17 @@ class GPT2_Wrapper(L.LightningModule):
         optimizer = AdamWScheduleFree(self.model.parameters(), lr=config.learning_rate, betas=config.betas, eps=config.eps, weight_decay=config.weight_decay)
         return optimizer
 
-gpt_model = GPT2_Wrapper.load_from_checkpoint(f"/kaggle/working/{ckpt_file}",model=gpt)
+gpt_model = GPT2_Wrapper(model=gpt)
 
 # logs
-logger = CSVLogger("logs", name=log_name)
+logger = CSVLogger("logs", name="lr_finder", flush_logs_every_n_steps=1)
 
-
+# setting up the trainer
 trainer = Trainer(max_epochs=1,
                   accelerator="cuda",
                   strategy="ddp",
                   devices=2,
                   logger=logger)
+
+# fitting the model
 trainer.fit(gpt_model, dataloader)
-
-model_path = f"logs/{log_name}/version_0/checkpoints/epoch=0-step=18311.ckpt"
-
-# upload the model
-api = HfApi()
-api.upload_file(
-    path_or_fileobj=model_path,
-    path_in_repo=model_upload_name,
-    repo_id="pt-sk/GPT2_pretrained_finewebedu10B",
-    repo_type="model",
-)
