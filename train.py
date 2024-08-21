@@ -52,7 +52,6 @@ torch.manual_seed(config.seed)
 
 
 # dataset preparation
-# dataset preparation
 class TokenDataset(Dataset):
     def __init__(self, input_ids, config: GPTConfig):
         self.input_ids = input_ids
