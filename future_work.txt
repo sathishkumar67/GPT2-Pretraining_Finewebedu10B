@@ -2,3 +2,7 @@
 2. need to update the code for downloading datasets of fineweb edu
 3. updating the dataset downloader for downloading other datasets
 4. using the file in metrics to plot eval
+5. optimal learning rate finder
+6. trying out various methods like adding rotary positional embeddings....
+
+using this as base model and implementing various techniques
