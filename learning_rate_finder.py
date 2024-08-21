@@ -183,12 +183,16 @@ class GPT(nn.Module):
 
 gpt = GPT(config)
 
+# learning rate values
+steps = 18311
+lr_values = np.linspace(1e-6, 1e-2, steps)
 
 class GPT2_Wrapper(L.LightningModule):
     def __init__(self, model):
         super().__init__()
         self.model = model
         self.optimizer = self.configure_optimizers()
+        self.count = 0
 
     def training_step(self, batch, batch_idx):
         self.model.train()
@@ -202,7 +206,9 @@ class GPT2_Wrapper(L.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = AdamWScheduleFree(self.model.parameters(), lr=config.learning_rate, betas=config.betas, eps=config.eps, weight_decay=config.weight_decay)
+        current_learning_rate = lr_values[self.count]
+        self.count += 1
+        optimizer = AdamWScheduleFree(self.model.parameters(), lr=current_learning_rate, betas=config.betas, eps=config.eps, weight_decay=config.weight_decay)
         return optimizer
 
 gpt_model = GPT2_Wrapper(model=gpt)
