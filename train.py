@@ -11,13 +11,13 @@ import lightning as L
 from lightning.pytorch import Trainer
 from lightning.pytorch.loggers import CSVLogger
 from schedulefree.adamw_schedulefree import AdamWScheduleFree
-from token import token
+import token
 
-print(token)
+files = [97, 14, 61]
+print(token.token)
+# ckpt_file = "33rd_30mtokens_model.ckpt"    # checkpoint loader
 
-# ckpt_file = "33rd_30mtokens_model.ckpt"
-
-log_name = "final_model"
+log_name = "1st"
 
 model_upload_name = "final_model.ckpt"
 
