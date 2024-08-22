@@ -198,7 +198,16 @@ class GPT2_Wrapper(L.LightningModule):
         self.model.train()
         optimizer = self.optimizers()
         optimizer.zero_grad()
-        
+
+        # accessing the current learning rate and changing it
+        current_learning_rate = lr_values[self.count]
+        self.count += 1
+        print(f"Current Learning Rate: {current_learning_rate}")
+        print(lr_values[self.count])
+
+        for param_group in optimizer.param_groups:
+            param_group['lr'] = current_learning_rate
+
         batch, label = batch
         _, loss = self.model(batch, label)
         self.log("Train_Loss", loss, prog_bar=True)
@@ -206,9 +215,7 @@ class GPT2_Wrapper(L.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        current_learning_rate = lr_values[self.count]
-        self.count += 1
-        optimizer = AdamWScheduleFree(self.model.parameters(), lr=current_learning_rate, betas=config.betas, eps=config.eps, weight_decay=config.weight_decay)
+        optimizer = AdamWScheduleFree(self.model.parameters(), lr=config.learning_rate, betas=config.betas, eps=config.eps, weight_decay=config.weight_decay)
         return optimizer
 
 gpt_model = GPT2_Wrapper(model=gpt)
