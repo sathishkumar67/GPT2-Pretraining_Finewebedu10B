@@ -202,8 +202,6 @@ class GPT2_Wrapper(L.LightningModule):
         # accessing the current learning rate and changing it
         current_learning_rate = lr_values[self.count]
         self.count += 1
-        print(f"Current Learning Rate: {current_learning_rate}")
-        print(lr_values[self.count])
 
         for param_group in optimizer.param_groups:
             param_group['lr'] = current_learning_rate
