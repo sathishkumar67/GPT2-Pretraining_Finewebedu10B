@@ -18,7 +18,7 @@ file2 = "edufineweb_train_000014.npy"
 file3 = "edufineweb_train_000061.npy"
 files = [file1, file2, file3]
 
-# ckpt_file = "33rd_30mtokens_model.ckpt"    # checkpoint loader
+ckpt_file = "33rd_30m_tokens.ckpt"    # checkpoint loader
 
 # logger name
 log_name = "1st"  
@@ -31,7 +31,7 @@ for file in files:
     hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename=file, repo_type="dataset", local_dir="/kaggle/working/")
 
 # checkpoint file downloader
-# hf_hub_download(repo_id="pt-sk/GPT2_pretrained_finewebedu10B", filename=ckpt_file, repo_type="model", local_dir="/kaggle/working/")
+hf_hub_download(repo_id="pt-sk/GPT2_pretrained_finewebedu10B", filename=ckpt_file, repo_type="model", local_dir="/kaggle/working/")
 
 
 # config
@@ -271,10 +271,7 @@ class GPT2_Wrapper(L.LightningModule):
         return optimizer
 
 # checkpoint loader model
-# gpt_model = GPT2_Wrapper.load_from_checkpoint(f"/kaggle/working/{ckpt_file}",model=gpt)
-
-# starter model
-gpt_model = GPT2_Wrapper(model=gpt)
+gpt_model = GPT2_Wrapper.load_from_checkpoint(f"/kaggle/working/{ckpt_file}",model=gpt)
 
 # logs
 logger = CSVLogger("logs", name=log_name)
