@@ -221,6 +221,9 @@ gpt_model = GPT2_Wrapper(model=gpt)
 # logs
 logger = CSVLogger("logs", name="lr_finder", flush_logs_every_n_steps=1)
 
+# saving the learning rate values
+np.save("lr_values.npy", lr_values)
+
 # setting up the trainer
 trainer = Trainer(max_epochs=1,
                   accelerator="cuda",
