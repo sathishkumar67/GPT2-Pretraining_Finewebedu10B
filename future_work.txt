@@ -1,8 +1,5 @@
 1. need to evaluate the finewebedu_gpt on hello swag eval
 2. need to update the code for downloading datasets of fineweb edu
-3. updating the dataset downloader for downloading other datasets
-4. using the file in metrics to plot eval
-5. optimal learning rate finder
-6. trying out various methods like adding rotary positional embeddings....
-
-using this as base model and implementing various techniques
+3. trying out various methods like adding rotary positional embeddings....
+4. using some related docs for 2nd stage training
+5. using this as base model and implementing various techniques
