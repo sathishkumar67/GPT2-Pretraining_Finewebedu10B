@@ -1,4 +1,5 @@
 # imports
+from __future__ import annotations
 from dataclasses import dataclass
 import torch
 import torch.nn as nn
@@ -10,10 +11,11 @@ import lightning as L
 from lightning.pytorch import Trainer
 from lightning.pytorch.loggers import CSVLogger
 from schedulefree.adamw_schedulefree import AdamWScheduleFree
+from token import token
 
-data_file = "edufineweb_train_000100.npy"
+print(token)
 
-ckpt_file = "33rd_30mtokens_model.ckpt"
+# ckpt_file = "33rd_30mtokens_model.ckpt"
 
 log_name = "final_model"
 
