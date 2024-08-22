@@ -11,26 +11,27 @@ import lightning as L
 from lightning.pytorch import Trainer
 from lightning.pytorch.loggers import CSVLogger
 from schedulefree.adamw_schedulefree import AdamWScheduleFree
-import token
 
-files = [97, 14, 61]
-print(token.token)
+# data files
+file1 = "edufineweb_train_000097.npy"
+file2 = "edufineweb_train_000014.npy"
+file3 = "edufineweb_train_000061.npy"
+files = [file1, file2, file3]
+
 # ckpt_file = "33rd_30mtokens_model.ckpt"    # checkpoint loader
 
-log_name = "1st"
-
-model_upload_name = "final_model.ckpt"
+# logger name
+log_name = "1st"  
 
 # logging in to the hugging face
-# login(login_token)
+login("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")
 
 # downloading the dataset
-# for file in [file_data1, file_data2, file_data3]:
-    # hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename=file, repo_type="dataset", local_dir="/kaggle/working/")
+for file in files:
+    hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename=file, repo_type="dataset", local_dir="/kaggle/working/")
 
-hf_hub_download(repo_id="pt-sk/fineweb_edu_10B", filename=data_file, repo_type="dataset", local_dir="/kaggle/working/")
-
-hf_hub_download(repo_id="pt-sk/GPT2_pretrained_finewebedu10B", filename=ckpt_file, repo_type="model", local_dir="/kaggle/working/")
+# checkpoint file downloader
+# hf_hub_download(repo_id="pt-sk/GPT2_pretrained_finewebedu10B", filename=ckpt_file, repo_type="model", local_dir="/kaggle/working/")
 
 
 # config
@@ -43,11 +44,11 @@ class GPTConfig:
     n_embd: int = 768 # embedding dimension
     batch_size: int = 8
     weight_decay: float = 0.1
-    learning_rate: float = 6e-4
+    learning_rate: float = 6e-5
     num_workers: int = 4
     betas = (0.9, 0.95)
     eps = 1e-8
-    seed: int = 1337
+    seed: int = 42
         
 config = GPTConfig()
 torch.manual_seed(config.seed)
@@ -77,12 +78,10 @@ class TokenDataset(Dataset):
         
         return torch.LongTensor(x.tolist()), torch.LongTensor(y.tolist())
     
-# tokens1 = np.load(f"/kaggle/working/{file_data1}")
-# tokens2 = np.load(f"/kaggle/working/{file_data2}")
-# tokens3 = np.load(f"/kaggle/working/{file_data3}")
-# tokens = np.concatenate([tokens1, tokens2, tokens3])
-
-tokens = np.load(f"/kaggle/working/{data_file}")
+tokens1 = np.load(f"/kaggle/working/{file1}")
+tokens2 = np.load(f"/kaggle/working/{file2}")
+tokens3 = np.load(f"/kaggle/working/{file3}")
+tokens = np.concatenate([tokens1, tokens2, tokens3])
 
 dataset = TokenDataset(tokens, config)
 dataloader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True, num_workers=config.num_workers)
@@ -271,26 +270,32 @@ class GPT2_Wrapper(L.LightningModule):
         optimizer = AdamWScheduleFree(self.model.parameters(), lr=config.learning_rate, betas=config.betas, eps=config.eps, weight_decay=config.weight_decay)
         return optimizer
 
-gpt_model = GPT2_Wrapper.load_from_checkpoint(f"/kaggle/working/{ckpt_file}",model=gpt)
+# checkpoint loader model
+# gpt_model = GPT2_Wrapper.load_from_checkpoint(f"/kaggle/working/{ckpt_file}",model=gpt)
+
+# starter model
+gpt_model = GPT2_Wrapper(model=gpt)
 
 # logs
 logger = CSVLogger("logs", name=log_name)
 
-
+# setting up the trainer
 trainer = Trainer(max_epochs=1,
                   accelerator="cuda",
                   strategy="ddp",
                   devices=2,
                   logger=logger)
-trainer.fit(gpt_model, dataloader)
 
-model_path = f"logs/{log_name}/version_0/checkpoints/epoch=0-step=18311.ckpt"
+# fitting the model
+trainer.fit(gpt_model, dataloader)
 
 # upload the model
 api = HfApi()
+
+# fileuploader
 api.upload_file(
-    path_or_fileobj=model_path,
-    path_in_repo=model_upload_name,
+    path_or_fileobj=f"logs/{log_name}/version_0/checkpoints/epoch=0-step=18311.ckpt",
+    path_in_repo=f"2nd_epoch/{log_name}.ckpt",
     repo_id="pt-sk/GPT2_pretrained_finewebedu10B",
     repo_type="model",
 )
