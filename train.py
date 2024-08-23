@@ -18,10 +18,10 @@ file2 = "edufineweb_train_000082.npy"
 file3 = "edufineweb_train_000054.npy"
 files = [file1, file2, file3]
 
-ckpt_file = "2nd_epoch/1st.ckpt"    # checkpoint loader
+ckpt_file = "2nd_epoch/2nd.ckpt"    # checkpoint loader
 
 # logger name
-log_name = "2nd"  
+log_name = "3rd"  
 
 # logging in to the hugging face
 login("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")
