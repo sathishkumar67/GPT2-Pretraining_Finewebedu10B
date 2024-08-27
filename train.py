@@ -15,8 +15,7 @@ from schedulefree.adamw_schedulefree import AdamWScheduleFree
 # data files
 file1 = "edufineweb_train_000072.npy"
 file2 = "edufineweb_train_000082.npy"
-file3 = "edufineweb_train_000054.npy"
-files = [file1, file2, file3]
+files = [file1, file2]
 
 ckpt_file = "2nd_epoch/2nd.ckpt"    # checkpoint loader
 
@@ -80,8 +79,7 @@ class TokenDataset(Dataset):
     
 tokens1 = np.load(f"/kaggle/working/{file1}")
 tokens2 = np.load(f"/kaggle/working/{file2}")
-tokens3 = np.load(f"/kaggle/working/{file3}")
-tokens = np.concatenate([tokens1, tokens2, tokens3])
+tokens = np.concatenate([tokens1, tokens2])
 
 dataset = TokenDataset(tokens, config)
 dataloader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True, num_workers=config.num_workers)
