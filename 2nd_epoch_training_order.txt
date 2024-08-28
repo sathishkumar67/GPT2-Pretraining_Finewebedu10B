@@ -5,3 +5,4 @@
 # training using 20m tokens
 3rd_20m_tokens = [72, 82]
 4th_20m_tokens = [54, 1]
+5th_20m_tokens = [80, 10]

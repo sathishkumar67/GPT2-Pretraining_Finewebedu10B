@@ -13,14 +13,14 @@ from lightning.pytorch.loggers import CSVLogger
 from schedulefree.adamw_schedulefree import AdamWScheduleFree
 
 # data files
-file1 = "edufineweb_train_000054.npy"
-file2 = "edufineweb_train_000001.npy"
+file1 = "edufineweb_train_000080.npy"
+file2 = "edufineweb_train_000010.npy"
 files = [file1, file2]
 
-ckpt_file = "2nd_epoch/3rd.ckpt"    # checkpoint loader
+ckpt_file = "2nd_epoch/4th.ckpt"    # checkpoint loader
 
 # logger name
-log_name = "4th"  
+log_name = "5th"  
 
 # logging in to the hugging face
 login("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")
