@@ -1,4 +1,7 @@
+# training using 30m tokens
 1st_30m_tokens = [97, 14, 61]
 2nd_30m_tokens = [23, 78, 45]
+
+# training using 20m tokens
 3rd_20m_tokens = [72, 82]
-4th_20m_tokens = [54, rand_no]
+4th_20m_tokens = [54, 1]
