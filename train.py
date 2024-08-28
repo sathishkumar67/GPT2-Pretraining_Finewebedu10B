@@ -13,14 +13,14 @@ from lightning.pytorch.loggers import CSVLogger
 from schedulefree.adamw_schedulefree import AdamWScheduleFree
 
 # data files
-file1 = "edufineweb_train_000072.npy"
-file2 = "edufineweb_train_000082.npy"
+file1 = "edufineweb_train_000054.npy"
+file2 = "edufineweb_train_000001.npy"
 files = [file1, file2]
 
-ckpt_file = "2nd_epoch/2nd.ckpt"    # checkpoint loader
+ckpt_file = "2nd_epoch/3rd.ckpt"    # checkpoint loader
 
 # logger name
-log_name = "3rd"  
+log_name = "4th"  
 
 # logging in to the hugging face
 login("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")
@@ -289,7 +289,7 @@ api = HfApi()
 
 # fileuploader
 api.upload_file(
-    path_or_fileobj=f"logs/{log_name}/version_0/checkpoints/epoch=0-step=18311.ckpt",
+    path_or_fileobj=f"logs/{log_name}/version_0/checkpoints/epoch=0-step=12207.ckpt",
     path_in_repo=f"2nd_epoch/{log_name}.ckpt",
     repo_id="pt-sk/GPT2_pretrained_finewebedu10B",
     repo_type="model",
