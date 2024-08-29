@@ -14,7 +14,7 @@ from schedulefree.adamw_schedulefree import AdamWScheduleFree
 
 # data files
 file1 = "edufineweb_train_000033.npy"
-file2 = "edufineweb_train_000099.npy"
+file2 = "edufineweb_train_000098.npy"
 files = [file1, file2]
 
 ckpt_file = "2nd_epoch/5th.ckpt"    # checkpoint loader
