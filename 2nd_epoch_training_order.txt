@@ -7,3 +7,4 @@
 4th_20m_tokens = [54, 1]
 5th_20m_tokens = [80, 10]
 6th_20m_tokens = [33, 98]
+7th_20m_tokens = [19, 91]
