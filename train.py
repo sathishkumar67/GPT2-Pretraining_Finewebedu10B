@@ -6,24 +6,21 @@ import torch.nn as nn
 from torch.nn import functional as F
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
-from huggingface_hub import login, hf_hub_download, HfApi
+from huggingface_hub import hf_hub_download
 import lightning as L
 from lightning.pytorch import Trainer
 from lightning.pytorch.loggers import CSVLogger
 from schedulefree.adamw_schedulefree import AdamWScheduleFree
 
 # data files
-file1 = "edufineweb_train_000011.npy"
-file2 = "edufineweb_train_000093.npy"
+file1 = "edufineweb_train_000047.npy"
+file2 = "edufineweb_train_000068.npy"
 files = [file1, file2]
 
-ckpt_file = "2nd_epoch/9th.ckpt"    # checkpoint loader
+ckpt_file = "2nd_epoch/10th.ckpt"    # checkpoint loader
 
 # logger name
-log_name = "10th"  
-
-# logging in to the hugging face
-login("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")
+log_name = "11th"  
 
 # downloading the dataset
 for file in files:
@@ -283,14 +280,3 @@ trainer = Trainer(max_epochs=1,
 
 # fitting the model
 trainer.fit(gpt_model, dataloader)
-
-# upload the model
-api = HfApi()
-
-# fileuploader
-api.upload_file(
-    path_or_fileobj=f"logs/{log_name}/version_0/checkpoints/epoch=0-step=12207.ckpt",
-    path_in_repo=f"2nd_epoch/{log_name}.ckpt",
-    repo_id="pt-sk/GPT2_pretrained_finewebedu10B",
-    repo_type="model",
-)
