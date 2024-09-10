@@ -1,5 +1,5 @@
 from huggingface_hub import login, hf_hub_download, HfApi
-
+log_name = ""
 # upload the model
 api = HfApi()
 
