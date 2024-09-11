@@ -12,3 +12,4 @@
 9th_20m_tokens = [73, 30]
 10th_20m_tokens = [11, 93]
 11th_20m_tokens = [47, 68]
+12th_20m_tokens = [8, 77]

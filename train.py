@@ -13,14 +13,14 @@ from lightning.pytorch.loggers import CSVLogger
 from schedulefree.adamw_schedulefree import AdamWScheduleFree
 
 # data files
-file1 = "edufineweb_train_000047.npy"
-file2 = "edufineweb_train_000068.npy"
+file1 = "edufineweb_train_000008.npy"
+file2 = "edufineweb_train_000077.npy"
 files = [file1, file2]
 
-ckpt_file = "2nd_epoch/10th.ckpt"    # checkpoint loader
+ckpt_file = "2nd_epoch/11th.ckpt"    # checkpoint loader
 
 # logger name
-log_name = "11th"  
+log_name = "12th"  
 
 # downloading the dataset
 for file in files:
